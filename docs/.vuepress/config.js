@@ -8,7 +8,7 @@ export default defineUserConfig({
 
   title: '魔法少女小凯的博客',
   description: '要记得好好吃饭喵!',
-  base: ".",
+  base: "/blog/",
   theme: defaultTheme({
     logo: 'https://vuejs.press/images/hero.png',
 
