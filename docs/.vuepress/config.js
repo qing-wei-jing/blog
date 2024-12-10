@@ -22,15 +22,15 @@ export default defineUserConfig({
       },
       {
         text: '后端相关',
-        link: '/category/',
+        link: '/backend/',
       },
       {
-        text: '服务器相关',
-        link: '/tag/',
+        text: '运维相关',
+        children:['/server/nginx.md']
       },
       {
         text: '其余杂谈',
-        link: '/timeline/',
+        link: '/dailyTalk/',
       },
     ],
   }),
