@@ -158,8 +158,8 @@ docker pull nginx
 
 # 创建挂载路径
 mkdir -p /data/docker/project-volumes/nginx.conf
-mkdir -p /data/nginx/log
-mkdir -p /data/nginx/html
+mkdir -p /data/docker/project-volumes/logs
+mkdir -p /data/nginx/project-volumes/html
 
 docker run -d \
   --name nginx \

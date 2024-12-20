@@ -22,7 +22,15 @@ export default defineUserConfig({
       },
       {
         text: '后端相关',
-        link: '/backend/',
+        children:[{
+          text:"Java基础",
+          children:['/frontend/vue3.md','/frontend/vue2.md']
+          },
+          {
+            text:"Mysql",
+            children:['/backend/mysql.md']
+          },
+        ],
       },
       {
         text: '运维相关',
