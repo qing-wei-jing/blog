@@ -48,16 +48,59 @@ a项目想调用b项目的接口，发送http请求，访问127.0.0.1:8082/goods
 注册中心要关注的重点是 服务注册与发现
 这里主要介绍 nacos1.x和nacos2.x和eruka的异同
 
-### eureka 底层
+### eureka 介绍
 * EurekaServer启动的时候注册自己的IP端口服务名称等信息
 * EurekaClient作为java客户端，在服务启动后周期性的（默认30s）向EurekaServer发送心跳
-* EurekaClient
 * EurekaServer在一定时间（默认90s）没有收到某个服务的心跳就会注销该实例，EurekaClient发送canel命令后也会注销该实例
 * EurekaServer之间会相互复制注册表信息
-* EurekaClient会缓存注册表信息
+* EurekaClient会缓存注册表信息 (二级缓存),从EurekaServer中拉取(默认30s)
+* EurekaServer的自我保护机制，如果15分钟内超过85%的客户端节点都没有正常的心跳，Eureka就会认为客户端与注册中心出现了网络故障，然后将实例保护起来，不让他们立即过期
+* EurekaClient发送cancel命令后，EurekaServer会立即注销该实例
 
+eureka的架构图
+![img.png](../assets/microservices-components/img_3.png)
 
+### nacos 介绍
+
+引入概念  
+临时实例和永久实例  
+
+临时实例(偏业务)  
+临时实例在注册到注册中心之后仅仅只保存在服务端内部一个缓存中，不会持久化到磁盘  
+这个服务端内部的缓存在注册中心届一般被称为服务注册表  
+当服务实例出现异常或者下线之后，就会把这个服务实例从服务注册表中剔除  
+
+永久实例(偏运维)  
+永久服务实例不仅仅会存在服务注册表中，同时也会被持久化到磁盘文件中  
+当服务实例出现异常或者下线，Nacos 只会将服务实例的健康状态设置为不健康，并不会对将其从服务注册表中剔除  
+所以这个服务实例的信息你还是可以从注册中心看到，只不过处于不健康状态  
+
+1.实例的区分异同
+在 1.x 版本中，一个服务中可以既有临时实例也有永久实例，服务实例是永久还是临时是由服务实例本身决定的  
+但是 2.x 版本中，一个服务中的所有实例要么都是临时的要么都是永久的，是由服务决定的，而不是具体的服务实例  
+![img.png](../assets/microservices-components/img_4.png)
+
+2.实例的通信协议异同  
+在nacos1.x中，由http实现，nacos客户端定时往nacos服务端发送消息  
+在nacos2.x中，由grpc实现，nacos客户端和nacos服务端之间建立长连接，通过长连接进行通信  
+在nacos2.x中，会将临时实例的信息存储到客户端中的缓存中，重新建立连接注册服务端的时候的redo操作  
+
+3.心跳实现  
+在 1.x 中，心跳机制实现是通过客户端和服务端各存在的一个定时任务来完成的  
+在服务注册时，发现是临时实例，客户端会开启一个 5s 执行一次的定时任务  
+![img.png](../assets/microservices-components/img_5.png)
+在 Nacos 服务端也会开启一个定时任务，默认也是 5s 执行一次，去检查这些服务实例最后一次心跳的时间，也就是客户端最后一次发送 Http 请求的时间  
+当最后一次心跳时间超过 15s，但没有超过 30s，会把这服务实例标记成不健康    
+当最后一次心跳超过 30s，直接把服务从服务注册表中剔除  
+![img.png](../assets/microservices-components/img_6.png)
+
+在 2.x 中，由于通信协议改成了 gRPC，客户端与服务端保持长连接，所以 2.x 版本之后它是利用这个 gRPC 长连接本身的心跳来保活  
+如果连接断开，就从注册表中剔除  
+Nacos 服务端也会启动一个定时任务，默认每隔 3s 执行一次，这个任务会去检查超过 20s 没有发送请求数据的连接
+
+4.健康检查机制(针对永久实例) 
+1.x和2.x版本实现机制相同，是由服务端向客户端发请求(tcp,http,mysql[通过执行sql来判断是否健康]),一般是tcp  
 
 相关文档参考  
-1.eruka 底层 推荐网页 https://blog.csdn.net/yizhichengxuyuan/article/details/107539963  
+1.eureka 底层 推荐网页 https://blog.csdn.net/yizhichengxuyuan/article/details/107539963  
 2.nacos 底层 推荐网页 https://blog.csdn.net/agonie201218/article/details/135828043
