@@ -39,7 +39,7 @@ export default defineUserConfig({
       },
       {
         text: '运维相关',
-        children:['/server/nginx.md']
+        children:['/server/nginx.md','/server/docker.md']
       },
       {
         text: '其余杂谈',

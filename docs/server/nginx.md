@@ -172,5 +172,7 @@ docker run -d \
   --build-arg context=. \
   --build-arg dockerfile=nginx-dockerfile \
   nginx
+  
+  
 ```
 
