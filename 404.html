@@ -19,25 +19,25 @@
       }
     </style>
     <script>
-      const userMode = localStorage.getItem('vuepress-color-scheme')
-      const systemDarkMode =
+      const useChoice = localStorage.getItem('vuepress-color-scheme')
+      const systemStatus =
         'matchMedia' in window
           ? window.matchMedia('(prefers-color-scheme: dark)').matches
           : false
 
-      if (userMode === 'light') {
+      if (useChoice === 'light') {
         document.documentElement.dataset.theme = 'light'
-      } else if (userMode === 'dark' || systemDarkMode) {
+      } else if (useChoice === 'dark' || systemStatus) {
         document.documentElement.dataset.theme = 'dark'
       }
     </script>
     <title>魔法少女小凯的博客</title><meta name="description" content="要记得好好吃饭喵!">
-    <link rel="preload" href="/blog/assets/style-B_dsdy-5.css" as="style"><link rel="stylesheet" href="/blog/assets/style-B_dsdy-5.css">
-    <link rel="modulepreload" href="/blog/assets/app-BC6xZAkL.js"><link rel="modulepreload" href="/blog/assets/404.html-Bg-YOR9x.js">
-    <link rel="prefetch" href="/blog/assets/index.html-BTKMdSYL.js" as="script"><link rel="prefetch" href="/blog/assets/get-started.html-Bxk25ydq.js" as="script"><link rel="prefetch" href="/blog/assets/mysql.html-C1BwyAXo.js" as="script"><link rel="prefetch" href="/blog/assets/vue2.html-Dk9ZWC-m.js" as="script"><link rel="prefetch" href="/blog/assets/vue3.html-CrAN3e6N.js" as="script"><link rel="prefetch" href="/blog/assets/nginx.html-C8FHYfVM.js" as="script">
+    <link rel="preload" href="/blog/assets/style-JHxLXKeP.css" as="style"><link rel="stylesheet" href="/blog/assets/style-JHxLXKeP.css">
+    <link rel="modulepreload" href="/blog/assets/app-DFasau3j.js"><link rel="modulepreload" href="/blog/assets/404.html-BqrDCvHZ.js">
+    <link rel="prefetch" href="/blog/assets/index.html-BtSKdvDb.js" as="script"><link rel="prefetch" href="/blog/assets/get-started.html-zvVrN31t.js" as="script"><link rel="prefetch" href="/blog/assets/microservices-components.html-D2y6xo75.js" as="script"><link rel="prefetch" href="/blog/assets/mysql.html-L-iox0dF.js" as="script"><link rel="prefetch" href="/blog/assets/vue2.html-BtIsXgdf.js" as="script"><link rel="prefetch" href="/blog/assets/vue3.html-DiJxWbgQ.js" as="script"><link rel="prefetch" href="/blog/assets/nginx.html-BI-qKZyE.js" as="script">
   </head>
   <body>
-    <div id="app"><!--[--><div class="vp-theme-container" vp-container data-v-d0421f4e><main class="page" data-v-d0421f4e><div class="theme-default-content" vp-content data-v-d0421f4e><h1 data-v-d0421f4e>404</h1><blockquote data-v-d0421f4e>Looks like we&#39;ve got some broken links.</blockquote><a class="route-link" href="/blog/" data-v-d0421f4e>Take me home</a></div></main></div><!--[--><!----><!--]--><!--]--></div>
-    <script type="module" src="/blog/assets/app-BC6xZAkL.js" defer></script>
+    <div id="app"><!--[--><div class="vp-theme-container" vp-container data-v-6f58a052><main class="page" data-v-6f58a052><div vp-content data-v-6f58a052><h1 data-v-6f58a052>404</h1><blockquote data-v-6f58a052>That&#39;s a Four-Oh-Four.</blockquote><a class="route-link" href="/blog/" data-v-6f58a052>Take me home</a></div></main></div><!--[--><!----><!--]--><!--]--></div>
+    <script type="module" src="/blog/assets/app-DFasau3j.js" defer></script>
   </body>
 </html>
