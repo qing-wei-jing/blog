@@ -38,7 +38,8 @@ export default defineUserConfig({
       },
       {
         text: '其余杂谈',
-        link: '/dailyTalk/',
+        children:['/dailyTalk/myself.md']
+        // link: '/dailyTalk/',
       },
     ],
   }),

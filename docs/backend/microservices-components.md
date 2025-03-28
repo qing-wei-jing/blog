@@ -23,11 +23,12 @@ Spring Cloud Alibaba：Alibaba 提供的基于 Spring Cloud 编程模型实现�
 ## 常用组件和原理介绍
 本片文章会从根据SpringCloudAlibaba的服务入手，讲讲各个生态的常用组件   
 官方地址 https://sca.aliyun.com/docs/2023/overview/what-is-sca  
- 
+
 组件可以分为 7种 
 着重讲的 
 * 注册配置中心
-* 限流降级  
+* 限流降级
+* 网关
 
 省略讲的  
 * 分布式定时任务
@@ -98,9 +99,138 @@ eureka的架构图
 如果连接断开，就从注册表中剔除  
 Nacos 服务端也会启动一个定时任务，默认每隔 3s 执行一次，这个任务会去检查超过 20s 没有发送请求数据的连接
 
-4.健康检查机制(针对永久实例) 
+4.健康检查机制(针对永久实例)  
 1.x和2.x版本实现机制相同，是由服务端向客户端发请求(tcp,http,mysql[通过执行sql来判断是否健康]),一般是tcp  
 
 相关文档参考  
 1.eureka 底层 推荐网页 https://blog.csdn.net/yizhichengxuyuan/article/details/107539963  
-2.nacos 底层 推荐网页 https://blog.csdn.net/agonie201218/article/details/135828043
+2.nacos 底层 推荐网页 https://blog.csdn.net/agonie201218/article/details/135828043  
+
+## 网关
+### 分布式网关的作用
+1.路由和负载均衡 (最主要)  
+2.安全与认证  
+3.流量请求和熔断  
+4.请求和响应的处理  
+5.监控与日志    
+6.服务解耦  
+
+### Spring Cloud Gateway
+网关的核心逻辑就是路由转发，执行过滤器链。  
+```text
+1. 客户端请求
+   │
+   ▼
+2. Gateway Handler Mapping（路由匹配）
+   │
+   ▼
+3. Gateway Web Handler（构建过滤器链）
+   │
+   ▼
+4. Pre 过滤器（按 Order 顺序执行）
+   │
+   ▼
+5. 转发请求到下游服务
+   │
+   ▼
+6. Post 过滤器（按 Order 顺序执行）
+   │
+   ▼
+7. 返回响应给客户端
+```
+如果使用配置类实现，pre和post是写在一个方法中的，通过 chain.filter(exchange) 作为区分，顺序就是写代码的从上到下实现。
+
+执行原理 架构图
+![img.png](../assets/microservices-components/img_7.png)
+
+``` yaml 
+# 参考相关的配置 yaml 形式
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      # 全局默认过滤器（作用于所有路由）
+      default-filters:
+        - AddRequestHeader=X-Global-Header, global-value  # 添加全局请求头
+        - DedupeResponseHeader=Access-Control-Allow-Origin  # 去重响应头
+      # 路由配置（核心部分）
+      routes:
+        # 路由1：基础路径匹配 + 服务发现
+        - id: user-service-route  # 路由唯一ID
+          uri: lb://user-service  # 目标服务地址（lb://表示负载均衡）
+          predicates:
+            - Path=/api/users/**  # 路径匹配
+            - Method=GET,POST     # 请求方法匹配
+            - Header=X-Request-Id, \d+  # 请求头匹配（正则）
+            - After=2023-01-01T00:00:00.000+08:00  # 时间匹配
+          filters:
+            - StripPrefix=2  # 去除前缀（/api/users/foo → /foo）
+            - AddRequestHeader=X-User-Source, gateway  # 添加请求头
+            - AddResponseHeader=X-Response-Time, $(currentTimestamp)  # 添加响应头（需自定义过滤器）
+            - RewritePath=/api/(?<segment>.*), /$\{segment}  # 路径重写
+            - Retry=3  # 重试次数（默认GET方法）
+            - name: RequestRateLimiter  # 限流过滤器
+              args:
+                redis-rate-limiter.replenishRate: 10  # 每秒令牌数
+                redis-rate-limiter.burstCapacity: 20  # 最大突发容量
+                key-resolver: "#{@ipKeyResolver}"  # 限流键解析器（需自定义Bean）
+
+        # 路由2：简化 常用配置
+        - id: order-service-route
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+      # 跨域配置 也可以放在一个配置类中 继承 GlobalFilter, Ordered
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            allowedHeaders: "*"
+            maxAge: 3600
+```
+```java 
+// 采用链式的规则的代码方式配置 
+/**
+ * 跨域过滤器
+ */
+public class CorsFilter implements GlobalFilter, Ordered {
+
+    @Override
+    @SuppressWarnings("serial")
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        return chain.filter(exchange).then(Mono.defer(() -> {
+            exchange.getResponse().getHeaders().entrySet().stream()
+                    .filter(kv -> (kv.getValue() != null && kv.getValue().size() > 1))
+                    .filter(kv -> (kv.getKey().equals(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)
+                            || kv.getKey().equals(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS)))
+                    .forEach(kv ->
+                    {
+                        kv.setValue(new ArrayList<String>() {{
+                            add(kv.getValue().get(0));
+                        }});
+                    });
+
+            return chain.filter(exchange);
+        }));
+    }
+
+    @Override
+    public int getOrder() {
+        return NettyWriteResponseFilter.WRITE_RESPONSE_FILTER_ORDER + 1;
+    }
+}
+```
+
+### Higress
+适配k8s，不太好配环境，暂时不学
+
+## 限流降级 + 监控
+// TODO 明天再写
+### Sentinel
+### Hystrix
