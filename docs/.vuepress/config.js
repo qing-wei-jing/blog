@@ -23,23 +23,18 @@ export default defineUserConfig({
       {
         text: '后端相关',
         children:[
-          //   {
-          // text:"Java基础",
-          // children:['/frontend/vue3.md','/frontend/vue2.md']
-          // },
-          {
-            text:"Mysql",
-            children:['/backend/mysql.md']
-          },
-          {
-            text:"微服务相关",
-            children:['/backend/microservices-components.md']
-          },
+          '/backend/java.md',
+          '/backend/mysql.md',
+          '/backend/microservices-components.md',
         ],
       },
       {
         text: '运维相关',
         children:['/server/nginx.md','/server/docker.md']
+      },
+      {
+        text: '工具使用',
+        children:['/tool/markdown.md']
       },
       {
         text: '其余杂谈',
