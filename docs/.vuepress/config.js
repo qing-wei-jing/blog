@@ -5,7 +5,7 @@ import { viteBundler } from '@vuepress/bundler-vite'
 
 export default defineUserConfig({
   lang: 'zn-ch',
-
+  port: '9000',
   title: '魔法少女小凯的博客',
   description: '要记得好好吃饭喵!',
   base: "/blog/",
@@ -29,6 +29,13 @@ export default defineUserConfig({
         ],
       },
       {
+        text: '开源项目学习',
+        children:[{
+          text:"若伊全家桶",
+          children:['/openSource/ry-vue.md']
+        }],
+      },
+      {
         text: '运维相关',
         children:['/server/nginx.md','/server/docker.md']
       },
@@ -38,7 +45,10 @@ export default defineUserConfig({
       },
       {
         text: '其余杂谈',
-        children:['/dailyTalk/myself.md']
+        children:['/dailyTalk/myself.md',{
+          text:"好文感悟",
+          children:['/dailyTalk/minHabit.md']
+        }]
         // link: '/dailyTalk/',
       },
     ],
