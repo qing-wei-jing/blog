@@ -33,11 +33,44 @@
 
 ## 部分/按钮的树形接口
 
-本人在公司也开发过这种树形接口，但是写起来有点乱，而且通用性不高。看看若依是怎么把这个接口写的漂亮的吧。
+本人在公司也开发过这种树形接口，但是写起来有点乱，而且通用性不高。看看若依是怎么把这个接口写的漂亮的吧
 
-实现效果展示
-![img.png](img.png)
+实现效果展示  
+
+![img.png](../assets/openSource/img.png)
+
+部门表的设计如下    
+需要核心的字段是dept_id和parent_id(指向上一级的id),这两个字段就可以用来构建成一棵树了
+
+![img_1.png](../assets/openSource/img_1.png)
+
+初始方法是这样的，其中这个SpringUtils.getAopProxy(this).selectDeptList(dept);
+大家可能会有点疑惑，如果是大家正常写的话应该是 selectDeptList(dept); 直接就可以得到list了。
+
+我这里简单解释下，如果直接使用selectDeptList(dept)会导致
+
+```javas
+@Override 
+public List<TreeSelect> selectDeptTreeList(SysDept dept)
+{
+    List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept);
+    return buildDeptTreeSelect(depts);
+}
+```
 
 
-![img_1.png](img_1.png)
+理财相关
+20%放余额宝 + 50%债券 + 30%的黄金(行情不好就放余额宝中，抄底)
+1.日常(支付宝3k+500每月 + 微信2k) 每月发工资的时候填充
+2.稳健理财(短期债券) 每个月定投1.5k
+3.看黄金趋势买入每月1k左右
+
+
+
+
+
+
+
+
+
 
