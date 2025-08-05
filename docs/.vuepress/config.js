@@ -45,7 +45,7 @@ export default defineUserConfig({
       },
       {
         text: '其余杂谈',
-        children:['/dailyTalk/myself.md',{
+        children:['/dailyTalk/good-code.md',{
           text:"好文感悟",
           children:['/dailyTalk/minHabit.md']
         }]
