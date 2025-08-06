@@ -45,7 +45,8 @@ export default defineUserConfig({
       },
       {
         text: '其余杂谈',
-        children:['/dailyTalk/myself.md',{
+        children:['/dailyTalk/myself.md','/dailyTalk/numberConvertError.md',
+          {
           text:"好文感悟",
           children:['/dailyTalk/minHabit.md']
         }]
