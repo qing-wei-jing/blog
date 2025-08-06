@@ -581,4 +581,91 @@ EVAL "local key = KEYS[1] local value = ARGV[1] redis.call('SET', key, value) re
 
 直接在java中写逻辑和使用Lua脚本的优劣
 
+先简单的实现一个限流器
+
+```lua 
+local key = KEYS[1]
+local time = tonumber(ARGV[1])
+local count = tonumber(ARGV[2])
+local current = redis.call('get',key)
+if current and tonumber(current)>count then    
+　　return tonumber(current)
+end
+current = redis.call('incr', key)
+if tonumber(current)==1 then    
+　　redis.call('expire',key,time)
+end
+return tonumber(current)
+```
+
+```Java
+public boolean isExceedLimit(String key, int expireSeconds, int limit) {
+    // 1. 获取当前计数
+    Long current = redisTemplate.opsForValue().increment(key, 1);
+    
+    // 2. 首次请求设置过期时间
+    if (current != null && current == 1) {
+        redisTemplate.expire(key, expireSeconds, TimeUnit.SECONDS);
+    }
+    
+    // 3. 判断是否超限
+    if (current != null && current > limit) {
+        return true; // 触发限流
+    }
+    return false;
+}
+```
+
+结论：Java 实现的局限性
+
+在分布式高并发环境中，Java 实现存在两大根本问题：  
+
+时间窗口漂移：  
+
+多个请求可能设置过期时间  
+导致实际时间窗口长度不稳定  
+
+永久键风险：  
+
+当第一个请求设置过期时间失败时  
+键可能变为永久存在  
+导致永久性限流故障  
+
+何时使用 Java 实现：  
+
+低并发场景
+允许少量计数误差  
+有外部监控可检测永久键问题  
+无法使用 Lua 脚本的环境  
+
+Lua 解决的核心问题：
+
+真正的原子操作：
+
+检查计数 → 自增 → 设置过期时间 在单次操作中完成  
+无并发干扰可能  
+
+精确的首次判断：
+ 
+if tonumber(current) == 1 在自增后判断  
+确保只有一个请求设置过期时间  
+
+超限提前返回：  
+如果已超限，不执行自增操作  
+避免无效计数增加  
+
+总结：
+
+| **考虑维度**       | **Lua脚本**                              | **Java实现**                            |
+|--------------------|------------------------------------------|-----------------------------------------|
+| **原子性**         | ✅ 完美保证                               | ❌ 需额外手段（事务、分布式锁）          |
+| **网络开销**       | ✅ 极低（1次往返）                        | ❌ 高（多次往返）                        |
+| **Redis阻塞风险**  | ⚠️ 可能（脚本过长时）                     | ✅ 低（每个命令快速）                    |
+| **开发调试**       | ❌ 困难                                   | ✅ 简单（集成IDE、日志）                 |
+| **可维护性**       | ⚠️ 中（需管理脚本版本）                   | ✅ 高（Java代码易管理）                 |
+| **兼容性**         | ⚠️ 依赖Redis版本和集群设置                | ✅ 高（命令通用）                        |
+| **错误处理**       | ❌ 脚本出错影响大                         | ✅ 灵活（可捕获异常重试）                |
+| **适用场景**       | 高并发、原子性要求高、网络延迟大的场景    | 低频、简单逻辑、需要与业务紧密集成的场景|
+
+
 
