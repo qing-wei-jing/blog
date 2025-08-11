@@ -667,5 +667,199 @@ if tonumber(current) == 1 在自增后判断
 | **错误处理**       | ❌ 脚本出错影响大                         | ✅ 灵活（可捕获异常重试）                |
 | **适用场景**       | 高并发、原子性要求高、网络延迟大的场景    | 低频、简单逻辑、需要与业务紧密集成的场景|
 
+## redis性能优化
+
+### 1.批量优化
+
+一个 Redis 命令的执行可以简化为以下 4 步：
+
+发送命令；  
+命令排队；  
+命令执行；   
+返回结果。     
+
+其中，第 1 步和第 4 步耗费时间之和称为 Round Trip Time（RTT，往返时间），也就是数据在网络上传输的时间。 使用批量操作可以减少网络传输次数，进而有效减小网络开销，大幅减少 RTT。
+
+#### 1.原生批量操作
+```Redis
+String类型  (MSET / MGET)
+MSET key1 "value1" key2 "value2"  # 批量设置
+MGET key1 key2                    # 批量获取 → ["value1", "value2"]
+
+Hash类型 (HMSET / HMGET)
+HSET user:1000 name "Alice" age 30    # 批量设置（HSET替代HMSET）
+HMGET user:1000 name age             # 批量获取 → ["Alice", "30"]
+
+List类型 (LPUSH / RPUSH)
+LPUSH mylist "a" "b" "c"  # 列表顺序 → ["c", "b", "a"]
+RPUSH mylist "x" "y"      # 列表顺序 → ["c", "b", "a", "x", "y"]
+```
+#### 2.pipeline批量操作
+pipeline 是一种将多个命令一次性发送给 Redis 服务器的方式，从而减少网络传输次数，提高性能。
+
+需要注意的是，pipeline和redis的事务是不同的概念
+事务是原子操作(但不保证原子性)，pipeline 是非原子操作。两个不同的事务不会同时运行，而 pipeline 可以同时以交错方式执行。
+Redis 事务中每个命令都需要发送到服务端，而 Pipeline 只需要发送一次，请求次数更少。
+
+```Java
+Jedis jedis = new Jedis("localhost", 6379);
+Pipeline pipe = jedis.pipelined();
+
+// 添加命令
+pipe.set("key1", "value1");
+pipe.get("key1");
+pipe.hset("user:1000", "name", "Alice");
+pipe.hgetAll("user:1000");
+
+// 同步发送并获取响应（返回 List<Object>）
+List<Object> results = pipe.syncAndReturnAll();
+System.out.println(results);  // [OK, value1, 1, {name=Alice}]
+
+jedis.close();
+```
+
+#### 3.Lua脚本
+Lua 脚本同样支持批量操作多条命令。 一段 Lua 脚本可以视作一条命令执行，可以看作是 原子操作。
+也就是说，一段 Lua 脚本执行过程中不会有其他脚本或 Redis 命令同时执行，保证了操作不会被其他指令插入或打扰，这是 pipeline 所不具备的。
+
+并且，Lua 脚本中支持一些简单的逻辑处理比如使用命令读取值并在 Lua 脚本中进行处理，这同样是 pipeline 所不具备的。
+不过， Lua 脚本依然存在下面这些缺陷：如果 Lua 脚本运行时出错并中途结束，之后的操作不会进行，但是之前已经发生的写操作不会撤销，所以即使使用了 Lua 脚本，也不能实现类似数据库回滚的原子性。
+
+Redis Cluster 下 Lua 脚本的原子操作也无法保证了，原因同样是无法保证所有的 key 都在同一个 hash slot（哈希槽） 上。
+
+### 2.BigKey优化
+#### 1.识别方法
+```redis
+# 扫描大 Key（生产环境慎用）
+redis-cli --bigkeys
+
+# 内存分析
+redis-cli memory usage <key>  # 查看单个 Key 内存占用
+redis-cli memory stats         # 全局内存分析
+```
+|数据类型|bigKey阈值|
+|------------|---------|
+|String	|> 10 KB|
+|Hash	|> 1000 个字段|
+|List	|> 1000 个元素|
+|Set/ZSet	|> 1000 个成员|
+#### 1.数据拆分
+垂直拆分
+```redis
+# 原始大 Key: user:1000_data (包含 profile, orders, logs 等)
+# 拆分后:
+HSET user:1000:profile name "Alice" age 30
+RPUSH user:1000:orders "order1" "order2"
+SET user:1000:logs "log_data..."
+```
+水平拆分/分片
+```Java
+// Java 分片示例
+int shardCount = 16; // 分片数
+String key = "big_hash_key";
+
+// 写入分片
+String field = "field123";
+int shardIndex = field.hashCode() % shardCount;
+redis.hset(key + ":" + shardIndex, field, value);
+
+// 读取分片
+String value = redis.hget(key + ":" + shardIndex, field);
+```
+#### 2.数据压缩
+使用 Gzip/Snappy 压缩文本数据
+
+二进制数据用 Protocol Buffers/MessagePack 序列化
+```Java
+// Gzip 压缩
+public byte[] compress(String data) throws IOException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    try (GZIPOutputStream gzip = new GZIPOutputStream(bos)) {
+        gzip.write(data.getBytes());
+    }
+    return bos.toByteArray();
+}
+
+// Redis 存储
+byte[] compressed = compress(largeJson);
+redis.set("compressed_key".getBytes(), compressed); 
+```
+#### 3.数据结构优化
+
+|原数据结构|	问题|	优化方案|	优势|
+|------------|---------|---------|---------|
+|大 List|	线性搜索慢	|改用 ZSet + 时间戳分页|	O(logN) 复杂度|
+|大 Set	|交集/并集操作慢	|改用 Bloom Filter|	节省 90% 内存|
+|大 String|	修改成本高	|分块存储	|局部更新|
+|大 Hash|	hgetall 阻塞 |	分片存储 + hscan	|按需读取|
+
+```redis
+# 原始 List 分页 (低效)
+LRANGE big_list 0 9
+
+# 优化为 ZSet (按时间排序)
+ZADD big_zset 1640995200 "item1" 1641081600 "item2"
+ZREVRANGE big_zset 0 9 WITHSCORES  # 获取最新10条
+```
+```redis
+Set	交集/并集操作慢
+# 创建容量100万，误判率1%的布隆过滤器
+BF.RESERVE user_filter 0.01 1000000
+
+# 添加元素
+BF.ADD user_filter user123
+BF.ADD user_filter user456
+
+# 检查是否存在
+BF.EXISTS user_filter user123  # 返回1（可能存在）
+BF.EXISTS user_filter user999  # 返回0（肯定不存在）
+
+```
+渐进式删除
+
+```redis
+# 非阻塞删除 (Redis 4.0+)
+UNLINK big_key
+
+# 渐进式删除 Hash
+HSCAN big_hash 0 COUNT 100 | while read field; do 
+    HDEL big_hash $field 
+done
+```
+### 3.HotKey优化
+如果一个 key 的访问次数比较多且明显多于其他 key 的话，那这个 key 就可以看作是 hotkey（热 Key）。
+
+例如在 Redis 实例的每秒处理请求达到 5000 次，而其中某个 key 的每秒访问量就高达 2000 次，那这个 key 就可以看作是 hotkey。
+
+处理 hotkey 会占用大量的 CPU 和带宽，可能会影响 Redis 实例对其他请求的正常处理。 此外，如果突然访问 hotkey 的请求超出了 Redis 的处理能力，Redis 就会直接宕机。
+
+这种情况下，大量请求将落到后面的数据库上，可能会导致数据库崩溃。因此，hotkey 很可能成为系统性能的瓶颈点，需要单独对其进行优化，以确保系统的高可用性和稳定性。
+
+
+```redis
+redis-cli --hotkeys              # Redis 4.0+（需开启 LFU 统计）
+redis-cli info commandstats      # 查看命令调用频次
+```
+解决方法
+
+读写分离：主节点处理写请求，从节点处理读请求。  
+使用 Redis Cluster：将热点数据分散存储在多个 Redis 节点上。  
+二级缓存：hotkey 采用二级缓存的方式进行处理，将 hotkey 存放一份到 JVM 本地内存中（可以用 Caffeine）。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
