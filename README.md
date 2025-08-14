@@ -32,18 +32,18 @@ redis，kafka，nacos，mysql，spring，mybatis，JVM，JUC，工作流，k8s +
 
 ---
 
-7月28日 到 8月10日 复习 redis
+7月28日 到 8月17日 复习 redis
 
 - [x] 学会儿redis的几种特殊的数据结构
 - [x] 为什么使用跳表实现有序集合
 - [x] 常见的读写策略详解
 - [x] 持久化
-- [ ] redis事务
-- [ ] 性能优化
-- [ ] 生产问题
+- [x] redis事务
+- [x] 性能优化
+- [x] 生产问题
 - [ ] 常见面试题汇总
 
-8月11日 到 8月24日 学习kafka
+8月17日 到 8月31日 学习kafka
 
 视频话题暂存：有时间思考，写个文章
 
@@ -61,3 +61,19 @@ redis，kafka，nacos，mysql，spring，mybatis，JVM，JUC，工作流，k8s +
 4.项目中为什么采用二进制压缩过的protobuf二进制字节流
 
 5.Java里那些数字转换的踩过的坑，必看！
+
+6.通过函数式接口实现动态排序，缩短大量switchcase or ifelse重复代码
+
+7.使用zset + hash ，解决redis中单个hash存储字段过大的问题。
+
+8.新增三个时间戳字段引发的 Protobuf 解析异常：一次线上事故的教训
+
+---
+暂留任务，晚上回去看
+- [ ] 基础知识复习【0/3】
+    - [ ] redis的线程模型
+    - [ ] redis的持久化
+    - [ ] 常见阻塞问题
+- [ ] 公司项目学习【0/2】
+    - [ ] 分布式id分析，大厂文章学习
+    - [ ] 服务器部署docker，尝试部署minikube
