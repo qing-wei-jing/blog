@@ -67,13 +67,3 @@ redis，kafka，nacos，mysql，spring，mybatis，JVM，JUC，工作流，k8s +
 7.使用zset + hash ，解决redis中单个hash存储字段过大的问题。
 
 8.新增三个时间戳字段引发的 Protobuf 解析异常：一次线上事故的教训
-
----
-暂留任务，晚上回去看
-- [ ] 基础知识复习【0/3】
-    - [ ] redis的线程模型
-    - [ ] redis的持久化
-    - [ ] 常见阻塞问题
-- [ ] 公司项目学习【0/2】
-    - [ ] 分布式id分析，大厂文章学习
-    - [ ] 服务器部署docker，尝试部署minikube
