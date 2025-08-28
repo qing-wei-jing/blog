@@ -203,6 +203,123 @@ Kafka 为分区（Partition）引入了多副本（Replica）机制，分区中�
 
 
 
+## 3.Kafka消费重试
+
+### 自动提交
+
+```java
+@KafkaListener(topics = {KafkaConst.TEST_TOPIC},groupId = "apple")
+private void customer(String message) throws InterruptedException {
+   log.info("kafka customer:{}",message);
+   Integer n = Integer.parseInt(message);
+   if (n%5==0){
+       throw new RuntimeException();
+   }
+}
+```
+
+看这段代码，如果传入的消息值是5，那么会抛出异常，此时会自动提交吗？他是不会自动提交了，只有这段代码全部执行完成了之后，才算是自动提交。
+
+### 手动提交
+
+配置消费者工厂
+
+```java
+public ConcurrentKafkaListenerContainerFactory<String, String> batchStatisticContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(newConsumerFactory());
+        factory.getContainerProperties()
+   					.setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        return factory;
+    }
+```
+
+配置手动提交
+
+```java
+private void customer(String message, Acknowledgment ack) throws InterruptedException {
+   try {
+       Integer n = Integer.parseInt(message);
+       if (n % 5 == 0) {
+           throw new RuntimeException();
+       }
+       // 业务逻辑处理成功，手动提交偏移量
+       ack.acknowledge();
+   } catch (Exception e) {
+       // 重要：不要提交偏移量，让消息能够重新被消费
+       throw e; // 重新抛出异常
+   }
+}
+```
+
+可以发现区别就在于入参这里多了个ack，如果ack.acknowledge();就代表着手动提交，和自动提交一样，异常就会被重新消费
+
+### 消费失败处理策略
+
+默认Kafka消费失败，一直重试到超过重试次数，然后消息就会被过滤，跳到下一个消息去消费了
+
+如果我们想要把消息收集起来，可以放到一个死信队列中，然后在死信队列中做一个信息收集和兜底的操作
+
+```java
+@RetryableTopic(
+    attempts = "5",
+    backoff = @Backoff(delay = 100, maxDelay = 1000),
+    dltTopicSuffix = ".dlt" // 自定义DLT后缀,如果发送失败了就往这个队列面发送消息
+)
+@KafkaListener(topics = {KafkaConst.TEST_TOPIC},groupId = "apple")
+private void customer(String message) throws InterruptedException {
+   log.info("kafka customer:{}",message);
+   Integer n = Integer.parseInt(message);
+   if (n%5==0){
+       throw new RuntimeException();
+   }
+}
+```
+
+在这里指定失败尝试的次数为5次，采用了backoff的策略，默认重试为100ms，默认的基数为2，
+
+1. 第1次重试延迟：`100ms`
+2. 第2次重试延迟：`100 * multiplier` (乘数，默认为2) = `200ms`
+3. 第3次重试延迟：`200 * 2 = 400ms`
+4. 第4次重试延迟：`400 * 2 = 800ms`
+5. 第5次重试延迟：`min(800 * 2, maxDelay)` = `min(1600, 1000)` = `1000ms`
+
+### 消费重试次数调整
+
+默认策略，重试10次，每次的重试间隔为0秒。
+
+```java
+public DefaultErrorHandler() {
+    this((ConsumerRecordRecoverer)null, SeekUtils.DEFAULT_BACK_OFF);
+}
+
+public final class SeekUtils {
+   	// 默认重试10次
+    public static final int DEFAULT_MAX_FAILURES = 10;
+    // 默认重试从0到9
+    public static final FixedBackOff DEFAULT_BACK_OFF = new FixedBackOff(0L, 9L);
+    private static final LoggingCommitCallback LOGGING_COMMIT_CALLBACK = new LoggingCommitCallback();
+
+```
+
+DefaultErrorHandler内部构造器的SeekUtils.DEFAULT_BACK_OFF创建，可以观察到默认的重试次数为10次
+
+所以我们可以自定义一个DeaultErrorHandler
+
+示例diamagnetic如下
+
+```java
+@Bean
+public KafkaListenerContainerFactory kafkaListenerContainerFactory(ConsumerFactory<String, String> consumerFactory) {
+    ConcurrentKafkaListenerContainerFactory factory = new ConcurrentKafkaListenerContainerFactory();
+    // 自定义重试时间间隔以及次数
+    FixedBackOff fixedBackOff = new FixedBackOff(1000, 5);
+    factory.setCommonErrorHandler(new DefaultErrorHandler(fixedBackOff));
+    factory.setConsumerFactory(consumerFactory);
+    return factory;
+}
+```
+
 
 
 
