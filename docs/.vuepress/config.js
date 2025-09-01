@@ -23,6 +23,7 @@ export default defineUserConfig({
                 text: '后端相关',
                 children: [
                     '/backend/java.md',
+                    '/backend/spring.md',
                     '/backend/mysql.md',
                     '/backend/microservices-components.md',
                     '/backend/kafka.md'
