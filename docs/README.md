@@ -9,6 +9,3 @@ actions:
 - text: b站主页
   link: https://space.bilibili.com/497395550?spm_id_from=333.1007.0.0
   type: secondary
-features:
-  - title: 备用标题
-    details: 备用内容

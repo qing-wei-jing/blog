@@ -5,7 +5,7 @@ import {viteBundler} from '@vuepress/bundler-vite'
 export default defineUserConfig({
     lang: 'zn-ch',
     port: '9000',
-    title: '魔法少女小凯的博客',
+    title: '魔法少女小凯的后端知识库',
     description: '要记得好好吃饭喵!',
     base: "/blog/",
     theme: defaultTheme({
@@ -46,7 +46,7 @@ export default defineUserConfig({
             },
             {
                 text: '其余杂谈',
-                children: ['/dailyTalk/good-code.md', '/dailyTalk/yinShi.md', {
+                children: ['/dailyTalk/good-code.md',{
                     text: "好文感悟",
                     children: ['/dailyTalk/minHabit.md']
                 }]
