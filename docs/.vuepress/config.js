@@ -10,19 +10,12 @@ export default defineUserConfig({
     base: "/blog/",
     theme: defaultTheme({
         logo: 'https://vuejs.press/images/hero.png',
-
         navbar: [
-            {
-                text: '前端相关',
-                children: [{
-                    text: "vue集合",
-                    children: ['/frontend/vue3.md', '/frontend/vue2.md']
-                }],
-            },
             {
                 text: '后端相关',
                 children: [
                     '/backend/java.md',
+                    '/backend/money-compute.md',
                     '/backend/spring.md',
                     '/backend/mysql.md',
                     '/backend/microservices-components.md',
