@@ -233,6 +233,7 @@ public ScheduledThreadPoolExecutor(int corePoolSize) {
           new DelayedWorkQueue());
 }
 ```
+
 #### 常见拒绝策略
 
-// todo
+拒绝测试是...
