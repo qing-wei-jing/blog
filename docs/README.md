@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: /images/yileina.png
+heroImage: /images/yileina.png 
 actions:
 - text: 开始学习
   link: /backend/microservices-components.md
