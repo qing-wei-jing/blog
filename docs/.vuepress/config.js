@@ -3,7 +3,7 @@ import {defineUserConfig} from 'vuepress'
 import {viteBundler} from '@vuepress/bundler-vite'
 
 export default defineUserConfig({
-    lang: 'zn-ch',
+    lang: 'zh-CN',
     port: '9000',
     title: '魔法少女小凯的后端知识库',
     description: '要记得好好吃饭喵!',
