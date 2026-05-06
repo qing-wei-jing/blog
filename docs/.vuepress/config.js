@@ -39,7 +39,7 @@ export default defineUserConfig({
             },
             {
                 text: '其余杂谈',
-                children: ['/dailyTalk/good-code.md',{
+                children: ['/dailyTalk/good-code.md', '/dailyTalk/zhi-xing-he-yi.md', {
                     text: "好文感悟",
                     children: ['/dailyTalk/minHabit.md']
                 }]
