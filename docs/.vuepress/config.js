@@ -17,6 +17,7 @@ export default defineUserConfig({
                     '/backend/java.md',
                     '/backend/money-compute.md',
                     '/backend/spring.md',
+                    '/backend/adx/ad-chain-async-speed-up.md',
                     '/backend/mysql.md',
                     '/backend/microservices-components.md',
                     '/backend/kafka.md'
