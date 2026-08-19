@@ -15,12 +15,18 @@ export default defineUserConfig({
                 text: '后端相关',
                 children: [
                     '/backend/java.md',
-                    '/backend/money-compute.md',
                     '/backend/spring.md',
-                    '/backend/adx/ad-chain-async-speed-up.md',
                     '/backend/mysql.md',
                     '/backend/microservices-components.md',
-                    '/backend/kafka.md'
+                    '/backend/kafka.md',
+                    {
+                        text: '程序化广告',
+                        children: [
+                            '/backend/adx/ad-chain-async-speed-up.md',
+                            '/backend/adx/protobuf-bug.md',
+                            '/backend/adx/money-compute.md'
+                        ],
+                    }
                 ],
             },
             {
