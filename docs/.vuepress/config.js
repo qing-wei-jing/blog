@@ -6,7 +6,7 @@ export default defineUserConfig({
     lang: 'zh-CN',
     port: '9000',
     title: '小晴的知识库',
-    description: '要记得好好吃饭喵!',
+    description: '晴为镜的个人知识库，记录 Java 后端、程序化广告与一路走来的思考。',
     base: "/blog/",
     theme: defaultTheme({
         logo: 'https://vuejs.press/images/hero.png',

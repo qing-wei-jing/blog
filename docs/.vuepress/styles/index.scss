@@ -1,0 +1,107 @@
+:root {
+    --vp-c-accent: #526fa8;
+    --vp-c-accent-bg: #526fa8;
+    --vp-c-accent-hover: #405d96;
+    --home-card-bg: #ffffff;
+    --home-card-border: #e5e9f2;
+    --home-shadow: 0 18px 48px rgba(47, 65, 104, 0.1);
+}
+
+[data-theme='dark'] {
+    --vp-c-accent: #9bb7ec;
+    --vp-c-accent-bg: #6f8bc3;
+    --vp-c-accent-hover: #819bd0;
+    --home-card-bg: #20232b;
+    --home-card-border: #343946;
+    --home-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+}
+
+.vp-home {
+    max-width: 1120px;
+}
+
+.vp-home .vp-hero-image {
+    width: 240px;
+    height: 240px;
+    border: 1px solid var(--home-card-border);
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: 47% 40%;
+    box-shadow: var(--home-shadow);
+}
+
+.vp-home #main-title {
+    margin-bottom: 0.8rem;
+    color: var(--vp-c-text);
+    font-weight: 760;
+    letter-spacing: 0.04em;
+}
+
+.vp-home .vp-hero-description {
+    max-width: 42rem;
+    margin-top: 0;
+    font-size: 1.35rem;
+    letter-spacing: 0.03em;
+}
+
+.vp-home .vp-hero-action-button {
+    border-radius: 999px;
+}
+
+.vp-home .vp-features {
+    gap: 1rem;
+    margin-top: 3.5rem;
+    padding: 0;
+    border-top: 0;
+}
+
+.vp-home .vp-feature {
+    box-sizing: border-box;
+    flex: 1 1 0;
+    max-width: none;
+    padding: 1.5rem 1.6rem;
+    border: 1px solid var(--home-card-border);
+    border-radius: 18px;
+    background: var(--home-card-bg);
+    box-shadow: 0 8px 28px rgba(47, 65, 104, 0.06);
+}
+
+.vp-home .vp-feature h2 {
+    margin-top: 0;
+    color: var(--vp-c-text);
+    font-weight: 650;
+}
+
+.vp-home .vp-feature p {
+    margin-bottom: 0;
+    line-height: 1.75;
+}
+
+@media (max-width: 719px) {
+    .vp-home .vp-hero-image {
+        width: 200px;
+        height: 200px;
+    }
+
+    .vp-home .vp-features {
+        gap: 0.85rem;
+    }
+
+    .vp-home .vp-feature {
+        width: 100%;
+        padding: 1.25rem;
+    }
+
+}
+
+@media (max-width: 419px) {
+    .vp-home .vp-hero-image {
+        width: 160px;
+        height: 160px;
+    }
+
+    .vp-home .vp-hero-description {
+        font-size: 1.1rem;
+    }
+
+}
