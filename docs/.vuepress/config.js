@@ -12,19 +12,28 @@ export default defineUserConfig({
         logo: 'https://vuejs.press/images/hero.png',
         navbar: [
             {
-                text: '后端相关',
+                text: '后端技术',
                 children: [
-                    '/backend/java.md',
-                    '/backend/spring.md',
-                    '/backend/mysql.md',
-                    '/backend/microservices-components.md',
-                    '/backend/kafka.md',
+                    { text: 'Java', link: '/backend/java.md' },
+                    { text: 'Spring', link: '/backend/spring.md' },
+                    { text: 'MySQL', link: '/backend/mysql.md' },
+                    { text: 'Kafka', link: '/backend/kafka.md' },
+                    { text: '微服务组件', link: '/backend/microservices-components.md' },
                     {
                         text: '程序化广告',
                         children: [
-                            '/backend/adx/ad-chain-async-speed-up.md',
-                            '/backend/adx/protobuf-bug.md',
-                            '/backend/adx/money-compute.md'
+                            {
+                                text: '广告链路性能优化',
+                                link: '/backend/adx/ad-chain-async-speed-up.md'
+                            },
+                            {
+                                text: 'Protobuf 协议兼容',
+                                link: '/backend/adx/protobuf-bug.md'
+                            },
+                            {
+                                text: '金额精度处理',
+                                link: '/backend/adx/money-compute.md'
+                            }
                         ],
                     }
                 ],
