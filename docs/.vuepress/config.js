@@ -33,6 +33,10 @@ export default defineUserConfig({
                             {
                                 text: '金额精度处理',
                                 link: '/backend/adx/money-compute.md'
+                            },
+                            {
+                                text: 'HTTP请求失败排查',
+                                link: '/backend/adx/http-get.md'
                             }
                         ],
                     }
