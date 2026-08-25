@@ -37,6 +37,10 @@ export default defineUserConfig({
                             {
                                 text: 'HTTP请求失败排查',
                                 link: '/backend/adx/http-get.md'
+                            },
+                            {
+                                text: 'redis和mysql不一致线上排查',
+                                link: '/backend/adx/flow-control-redis-consistency-postmortem.md'
                             }
                         ],
                     }
