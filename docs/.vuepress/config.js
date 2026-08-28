@@ -41,6 +41,10 @@ export default defineUserConfig({
                             {
                                 text: 'redis和mysql不一致线上排查',
                                 link: '/backend/adx/flow-control-redis-consistency-postmortem.md'
+                            },
+                            {
+                                text: '慢渠道故障隔离(jvm级别排查)',
+                                link: '/backend/adx/慢渠道故障隔离复盘.md'
                             }
                         ],
                     }
