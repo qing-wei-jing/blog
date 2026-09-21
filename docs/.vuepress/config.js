@@ -14,11 +14,11 @@ export default defineUserConfig({
             {
                 text: '后端技术',
                 children: [
-                    { text: 'Java', link: '/backend/java.md' },
-                    { text: 'Spring', link: '/backend/spring.md' },
-                    { text: 'MySQL', link: '/backend/mysql.md' },
-                    { text: 'Kafka', link: '/backend/kafka.md' },
-                    { text: '微服务组件', link: '/backend/microservices-components.md' },
+                    {text: 'Java', link: '/backend/java.md'},
+                    {text: 'Spring', link: '/backend/spring.md'},
+                    {text: 'MySQL', link: '/backend/mysql.md'},
+                    {text: 'Kafka', link: '/backend/kafka.md'},
+                    {text: '微服务组件', link: '/backend/microservices-components.md'},
                     {
                         text: '程序化广告',
                         children: [
@@ -67,11 +67,15 @@ export default defineUserConfig({
             },
             {
                 text: '其余杂谈',
-                children: ['/dailyTalk/good-code.md', '/dailyTalk/zhi-xing-he-yi.md', '/dailyTalk/think-first-then-act.md','/dailyTalk/twice-dream.md', {
-                    text: "好文感悟",
-                    children: ['/dailyTalk/minHabit.md']
-                }]
-                // link: '/dailyTalk/',
+                children: ['/dailyTalk/good-code.md', '/dailyTalk/zhi-xing-he-yi.md', '/dailyTalk/think-first-then-act.md', '/dailyTalk/twice-dream.md',
+                    {
+                        text: '怎么理解成长',
+                        link: '/dailyTalk/怎么理解成长.md'
+                    },
+                    {
+                        text: "好文感悟",
+                        children: ['/dailyTalk/minHabit.md']
+                    }]
             },
         ],
     }),
