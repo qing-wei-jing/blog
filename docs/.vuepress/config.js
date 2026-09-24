@@ -73,6 +73,10 @@ export default defineUserConfig({
                         link: '/dailyTalk/怎么理解成长.md'
                     },
                     {
+                        text:'模仿与方法论',
+                        link: '/dailyTalk/from-imitation-to-my-own-approach.md'
+                    },
+                    {
                         text: "好文感悟",
                         children: ['/dailyTalk/minHabit.md']
                     }]
