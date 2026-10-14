@@ -77,6 +77,10 @@ export default defineUserConfig({
                         link: '/dailyTalk/from-imitation-to-my-own-approach.md'
                     },
                     {
+                        text:'环境改变行动',
+                        link: '/dailyTalk/env-change-action.md'
+                    },
+                    {
                         text: "好文感悟",
                         children: ['/dailyTalk/minHabit.md']
                     }]
