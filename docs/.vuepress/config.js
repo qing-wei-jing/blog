@@ -45,6 +45,10 @@ export default defineUserConfig({
                             {
                                 text: '慢渠道故障隔离(jvm级别排查)',
                                 link: '/backend/adx/慢渠道故障隔离复盘.md'
+                            },
+                            {
+                                text: '复杂sql(分组并连续)',
+                                link: '/backend/adx/sql-complex.md'
                             }
                         ],
                     }
