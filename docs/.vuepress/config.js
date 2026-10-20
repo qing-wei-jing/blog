@@ -49,6 +49,9 @@ export default defineUserConfig({
                             {
                                 text: '复杂sql(分组并连续)',
                                 link: '/backend/adx/sql-complex.md'
+                            },{
+                                text: 'redis的大key和hotkey的问题',
+                                link: '/backend/adx/redis-key-problem.md'
                             }
                         ],
                     }
